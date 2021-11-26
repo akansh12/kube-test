@@ -2,11 +2,11 @@ apiVersion: v1
 kind: Pod
 metadata:
   # Name of the pod. This is the name to use in any interaction with kubectl
-  name: py
+  name: locallabels
 spec:
   securityContext:
     # You need to specify your user ID here. You can get this by running "id -u"
-    runAsUser: id
+    runAsUser: 1223
   volumes:
   # The following 3 entries are the NFS mounts available to you. You do not need to
   # modify them. They are for your home folder, and the shared tools and datasets
@@ -28,10 +28,10 @@ spec:
 #      claimName: data3
 #  - name: scratch1
 #    persistentVolumeClaim:
-#      claimName: scratch1
-  - name: scratch2
+#      claimName: scratch6
+  - name: scratch6
     persistentVolumeClaim:
-      claimName: scratch2
+      claimName: scratch6
   # The following 3 entries make the Nvidia drivers available. You do not need to
   # modify them.
   #- hostPath:
@@ -51,7 +51,7 @@ spec:
     name: lib
  # You can specify a label indicating a specific model of GPU here when you need it.
   # Leave it commented when learning how to use the cluster.
-#  nodeName: panini
+  nodeName: lamport
    # This part specifies the Docker container in which your code will run.
   containers:
   - name: local-image-container
@@ -65,28 +65,29 @@ spec:
     # call that script like below.
     # 
     # Note that all paths have to be according to the filesystem inside the container.
-    command: ["/bin/bash", "/path/to/run.sh"]
+    command: ["/bin/bash", "/storage/home/akansh12/test/kube-test/job/run.sh"]
     # This section specifies the resources you ask for.
     resources:
       # For the purposes of using the cluster, the "requests" section should be the
       # same as the "limits" section except for the line for GPU
      limits:
-        nvidia.com/gpu: 1        
+        nvidia.com/gpu: 4
         #alpha.kubernetes.io/nvidia-gpu: 1 # Number of GPUs
         # RAM can be specified in either MiB (1024x1024 bytes) (ex. "500Mi")
         # or GiB (ex. "4Gi")
-        memory: "4Gi"
-        cpu: "1" # Number of CPU cores
+        memory: "12Gi"
+
+        cpu: "4" # Number of CPU cores
      requests:
-        memory: "4Gi"
-        cpu: "1"
+        memory: "8Gi"
+        cpu: "4"
     # Here, you can specify where you want the above directories to be mounted
     # within the container. It is recommended to use this configuration as
     # it mirrors what is present on the master machine.
     volumeMounts:
     # Entry for your home folder. Make sure to replace <username> with your
     # username.
-    - mountPath: /storage/home/<username>
+    - mountPath: /storage/home/akansh12/
       name: home
     # Entry for the other folders mentioned above.
     - mountPath: /tools
@@ -97,10 +98,10 @@ spec:
 #      name: data2
 #    - mountPath: /datasets/data3
 #      name: data3
-#    - mountPath: /scratch/scratch1
-#      name: scratch1
-    - mountPath: /scratch/scratch2
-      name: scratch2
+    - mountPath: /scratch/scratch6
+      name: scratch6
+    # - mountPath: /scratch/scratch2
+    #   name: scratch2
 #    - mountPath: /usr/local/nvidia/bin
 #      name: nvbin
 #    - mountPath: /usr/local/nvidia/lib
